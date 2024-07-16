@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/your-username/your-repo.git'
+                git 'https://github.com/abhinavakr/Docker-Zero-to-Heroabhi.git'
             }
         }
 
@@ -47,8 +47,6 @@ pipeline {
         always {
             script {
                 docker.image("${env.DOCKER_IMAGE}").inside {
-                    sh 'docker stop my-container || true'
-                    sh 'docker rm my-container || true'
                 }
             }
         }
