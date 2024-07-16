@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/abhinavakr/Docker-Zero-to-Heroabhi.git'
+                git 'https://github.com/abhinavakr/Docker-Zero-to-Heroabhi/tree/main/examples/first-docker-file'
             }
         }
 
