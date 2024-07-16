@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'my-docker-image' // Name of your Docker image
+        DOCKER_REGISTRY = 'your-docker-registry' // Your Docker registry URL (optional)
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/your-username/your-repo.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${env.DOCKER_IMAGE}", '.')
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            when {
+                expression { env.DOCKER_REGISTRY != null && env.DOCKER_REGISTRY != '' }
+            }
+            steps {
+                script {
+                    docker.withRegistry("https://${env.DOCKER_REGISTRY}", 'docker-credentials-id') {
+                        docker.image("${env.DOCKER_IMAGE}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    docker.image("${env.DOCKER_IMAGE}").run('-d --name my-container')
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                docker.image("${env.DOCKER_IMAGE}").inside {
+                    sh 'docker stop my-container || true'
+                    sh 'docker rm my-container || true'
+                }
+            }
+        }
+        success {
+            echo 'Build and deployment successful!'
+        }
+        failure {
+            echo 'Build or deployment failed.'
+        }
+    }
+}
