@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'my-docker-image' // Name of your Docker image
+        DOCKER_IMAGE = 'my-docker' // Name of your Docker image
         DOCKER_REGISTRY = 'your-docker-registry' // Your Docker registry URL (optional)
     }
 
