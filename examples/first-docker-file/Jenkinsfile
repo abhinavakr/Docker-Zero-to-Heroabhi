@@ -1,60 +1,41 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'my-docker' // Name of your Docker image
-        DOCKER_REGISTRY = 'your-docker-registry' // Your Docker registry URL (optional)
-    }
-
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/abhinavakr/Docker-Zero-to-Heroabhi/tree/main/examples/first-docker-file'
+                git url: 'https://github.com/abhinavakr/Docker-Zero-to-Heroabhi/tree/main/examples/first-docker-file.git', branch: 'main'
             }
         }
-
-        stage('Build Docker Image') {
+        
+        stage('Build') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_IMAGE}", '.')
+                    docker.build('my-python-app')
                 }
             }
         }
-
-        stage('Push Docker Image') {
-            when {
-                expression { env.DOCKER_REGISTRY != null && env.DOCKER_REGISTRY != '' }
-            }
+        
+        stage('Test') {
             steps {
                 script {
-                    docker.withRegistry("https://${env.DOCKER_REGISTRY}", 'docker-credentials-id') {
-                        docker.image("${env.DOCKER_IMAGE}").push()
+                    docker.image('my-python-app').inside {
+                        sh 'python app.py test'
                     }
                 }
             }
         }
-
-        stage('Run Docker Container') {
+        
+        stage('Deploy') {
             steps {
                 script {
-                    docker.image("${env.DOCKER_IMAGE}").run('-d --name my-container')
+                    docker.image('my-python-app').inside {
+                        sh 'python app.py'
+                    }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            script {
-                docker.image("${env.DOCKER_IMAGE}").inside {
-                }
-            }
-        }
-        success {
-            echo 'Build and deployment successful!'
-        }
-        failure {
-            echo 'Build or deployment failed.'
         }
     }
 }
+
+               
